@@ -1,6 +1,6 @@
 import os
 import tkinter as tk
-from tkinter import scrolledtext
+from tkinter import scrolledtext, PhotoImage
 import requests
 from dotenv import load_dotenv
 
@@ -58,7 +58,9 @@ def send_message():
     Handles sending a message from the user and displaying the bot's response.
     """
     user_input_text = input_field.get().strip()
-    if not user_input_text:
+    
+    # Check if the input is just the placeholder text or empty
+    if user_input_text == PLACEHOLDER_TEXT or not user_input_text:
         return 
 
     # Display user message on the right
@@ -66,7 +68,10 @@ def send_message():
     chat_log.insert(tk.END, "You: " + user_input_text + "\n", "user") # Apply 'user' tag
     chat_log.insert(tk.END, "\n") # Add an extra newline for spacing between messages
     chat_log.config(state=tk.DISABLED)
+    
     input_field.delete(0, tk.END)
+    # After sending, re-apply placeholder if field is empty (which it will be)
+    set_placeholder()
 
     # Disable input and show typing indicator
     input_field.config(state=tk.DISABLED)
@@ -88,6 +93,26 @@ def send_message():
     send_button.config(state=tk.NORMAL)
     loading_label.config(text="", fg="black") # Clear loading text
     input_field.focus_set() # Set focus back to input field
+
+# --- Placeholder functionality ---
+PLACEHOLDER_TEXT = "Ask me a question..."
+PLACEHOLDER_COLOR = '#888888'
+NORMAL_TEXT_COLOR = '#000000'
+
+def on_focus_in(event):
+    if input_field.get() == PLACEHOLDER_TEXT:
+        input_field.delete(0, tk.END)
+        input_field.config(fg=NORMAL_TEXT_COLOR)
+
+def on_focus_out(event):
+    if not input_field.get():
+        set_placeholder()
+
+def set_placeholder():
+    input_field.insert(0, PLACEHOLDER_TEXT)
+    input_field.config(fg=PLACEHOLDER_COLOR)
+# --- End Placeholder functionality ---
+
 
 # GUI window setup
 root = tk.Tk()
@@ -122,11 +147,18 @@ loading_label.grid(row=1, column=0, columnspan=2, padx=10, pady=(0, 5), sticky="
 # Input field
 input_field = tk.Entry(root, width=60, font=("Arial", 12), relief=tk.FLAT, bd=1, highlightbackground="#ced4da", highlightthickness=1)
 input_field.grid(row=2, column=0, padx=(10, 5), pady=(0, 10), sticky="ew")
+
+# Bind placeholder events
+input_field.bind("<FocusIn>", on_focus_in)
+input_field.bind("<FocusOut>", on_focus_out)
 input_field.bind("<Return>", lambda event=None: send_message()) # Bind Enter key
+
+# Set initial placeholder
+set_placeholder()
 
 # Send button
 send_button = tk.Button(root, text="Send", command=send_message, font=("Arial", 12, "bold"), 
-                        bg="#28a745", fg="white", activebackground="#218838", activeforeground="white",
+                        bg="#082297", fg="white", activebackground="#4F7AC9", activeforeground="white",
                         relief=tk.GROOVE, bd=2) # Grooved border for a slightly raised effect
 send_button.grid(row=2, column=1, padx=(5, 10), pady=(0, 10), sticky="e")
 
