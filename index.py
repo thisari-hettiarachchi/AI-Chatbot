@@ -4,13 +4,9 @@ from tkinter import scrolledtext
 import requests
 from dotenv import load_dotenv
 
-# Load API key from .env file
-# Create a .env file in the same directory as this script and add:
-# GEMINI_API_KEY="YOUR_GEMINI_API_KEY_HERE"
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-# Check if API key is loaded
 if not GEMINI_API_KEY:
     print("Error: GEMINI_API_KEY not found. Please set it in a .env file.")
     exit()
@@ -30,7 +26,7 @@ def ask_gemini(message):
 
     try:
         response = requests.post(api_url, json=payload)
-        response.raise_for_status() # Raise an HTTPError for bad responses (4xx or 5xx)
+        response.raise_for_status()
         result = response.json()
 
         if result.get("candidates") and len(result["candidates"]) > 0 and \
@@ -63,11 +59,12 @@ def send_message():
     """
     user_input_text = input_field.get().strip()
     if not user_input_text:
-        return # Don't send empty messages
+        return 
 
-    # Display user message
+    # Display user message on the right
     chat_log.config(state=tk.NORMAL)
-    chat_log.insert(tk.END, "You: " + user_input_text + "\n")
+    chat_log.insert(tk.END, "You: " + user_input_text + "\n", "user") # Apply 'user' tag
+    chat_log.insert(tk.END, "\n") # Add an extra newline for spacing between messages
     chat_log.config(state=tk.DISABLED)
     input_field.delete(0, tk.END)
 
@@ -77,15 +74,12 @@ def send_message():
     loading_label.config(text="Bot: Typing...", fg="#6c757d")
     root.update_idletasks() # Update GUI to show changes immediately
 
-    # Get bot response (run in a separate thread for non-blocking UI if complex,
-    # but for simple requests, it's often fine to block briefly)
-    # For a more robust solution, especially for long-running API calls,
-    # consider using threading or asyncio. For this example, we'll keep it synchronous for simplicity.
     bot_response = ask_gemini(user_input_text)
 
-    # Display bot message
+    # Display bot message on the left
     chat_log.config(state=tk.NORMAL)
-    chat_log.insert(tk.END, "Bot: " + bot_response + "\n\n")
+    chat_log.insert(tk.END, "Bot: " + bot_response + "\n", "bot") # Apply 'bot' tag
+    chat_log.insert(tk.END, "\n") # Add an extra newline for spacing
     chat_log.config(state=tk.DISABLED)
     chat_log.yview(tk.END) # Scroll to the end
 
@@ -111,12 +105,14 @@ chat_log = scrolledtext.ScrolledText(root, wrap=tk.WORD, state=tk.DISABLED,
                                      bg="#e9ecef", fg="#343a40",
                                      relief=tk.FLAT, bd=0) # Flat border
 chat_log.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
-chat_log.tag_configure("user", foreground="#007bff", justify='right')
-chat_log.tag_configure("bot", foreground="#343a40", justify='left')
+
+# Configure tags for alignment and color
+chat_log.tag_configure("user", foreground="#007bff", justify='right') # User messages on the right
+chat_log.tag_configure("bot", foreground="#343a40", justify='left')   # Bot messages on the left
 
 # Initial bot message
 chat_log.config(state=tk.NORMAL)
-chat_log.insert(tk.END, "Bot: Hello! How can I help you today?\n\n")
+chat_log.insert(tk.END, "Bot: Hello! How can I help you today?\n\n", "bot") # Apply 'bot' tag for initial message
 chat_log.config(state=tk.DISABLED)
 
 # Loading indicator label
