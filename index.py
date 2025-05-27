@@ -1,6 +1,7 @@
 import os
+import sys
 import tkinter as tk
-from tkinter import scrolledtext, PhotoImage
+from tkinter import scrolledtext
 import requests
 from dotenv import load_dotenv
 
@@ -9,7 +10,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 if not GEMINI_API_KEY:
     print("Error: GEMINI_API_KEY not found. Please set it in a .env file.")
-    exit()
+    sys.exit(1)
 
 def ask_gemini(message):
     """
@@ -65,34 +66,33 @@ def send_message():
 
     # Display user message on the right
     chat_log.config(state=tk.NORMAL)
-    chat_log.insert(tk.END, "You: " + user_input_text + "\n", "user") # Apply 'user' tag
-    chat_log.insert(tk.END, "\n") # Add an extra newline for spacing between messages
+    chat_log.insert(tk.END, "You: " + user_input_text + "\n", "user")
+    chat_log.insert(tk.END, "\n")
     chat_log.config(state=tk.DISABLED)
     
     input_field.delete(0, tk.END)
-    # After sending, re-apply placeholder if field is empty (which it will be)
     set_placeholder()
 
     # Disable input and show typing indicator
     input_field.config(state=tk.DISABLED)
     send_button.config(state=tk.DISABLED)
     loading_label.config(text="Bot: Typing...", fg="#6c757d")
-    root.update_idletasks() # Update GUI to show changes immediately
+    root.update_idletasks()
 
     bot_response = ask_gemini(user_input_text)
 
     # Display bot message on the left
     chat_log.config(state=tk.NORMAL)
-    chat_log.insert(tk.END, "Bot: " + bot_response + "\n", "bot") # Apply 'bot' tag
-    chat_log.insert(tk.END, "\n") # Add an extra newline for spacing
+    chat_log.insert(tk.END, "Bot: " + bot_response + "\n", "bot")
+    chat_log.insert(tk.END, "\n")
     chat_log.config(state=tk.DISABLED)
-    chat_log.yview(tk.END) # Scroll to the end
+    chat_log.yview(tk.END)
 
     # Re-enable input and hide typing indicator
     input_field.config(state=tk.NORMAL)
     send_button.config(state=tk.NORMAL)
-    loading_label.config(text="", fg="black") # Clear loading text
-    input_field.focus_set() # Set focus back to input field
+    loading_label.config(text="", fg="black")
+    input_field.focus_set()
 
 # --- Placeholder functionality ---
 PLACEHOLDER_TEXT = "Ask me a question..."
@@ -109,58 +109,69 @@ def on_focus_out(event):
         set_placeholder()
 
 def set_placeholder():
+    input_field.delete(0, tk.END)
     input_field.insert(0, PLACEHOLDER_TEXT)
     input_field.config(fg=PLACEHOLDER_COLOR)
 # --- End Placeholder functionality ---
 
+# --- GUI Setup ---
 
-# GUI window setup
 root = tk.Tk()
 root.title("Gemini AI Chatbot")
-root.geometry("600x600") # Set initial window size
-root.resizable(True, True) # Allow resizing
+root.geometry("700x700")
+root.configure(bg="#F4F6F8")  # Light gray background
+root.resizable(True, True)
 
-# Configure grid layout
-root.grid_rowconfigure(0, weight=1) # Chat log expands vertically
-root.grid_columnconfigure(0, weight=1) # Input field expands horizontally
+# Fonts and Colors
+FONT = ("Segoe UI", 12)
+USER_COLOR = "#1E88E5"
+BOT_COLOR = "#263238"
+BG_COLOR = "#F4F6F8"
+INPUT_BG = "#FFFFFF"
+BUTTON_BG = "#0D47A1"
+BUTTON_HOVER = "#1565C0"
 
-# Chat log window
-chat_log = scrolledtext.ScrolledText(root, wrap=tk.WORD, state=tk.DISABLED, 
-                                     width=60, height=20, font=("Arial", 12),
-                                     bg="#e9ecef", fg="#343a40",
-                                     relief=tk.FLAT, bd=0) # Flat border
-chat_log.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+# Configure layout
+root.grid_rowconfigure(0, weight=1)
+root.grid_columnconfigure(0, weight=1)
 
-# Configure tags for alignment and color
-chat_log.tag_configure("user", foreground="#007bff", justify='right') # User messages on the right
-chat_log.tag_configure("bot", foreground="#343a40", justify='left')   # Bot messages on the left
+# Chat log styling
+chat_log = scrolledtext.ScrolledText(root, wrap=tk.WORD, state=tk.DISABLED,
+                                     font=FONT, bg="#FFFFFF", fg=BOT_COLOR,
+                                     relief=tk.FLAT, bd=0)
+chat_log.grid(row=0, column=0, columnspan=2, padx=20, pady=20, sticky="nsew")
+chat_log.tag_configure("user", foreground=USER_COLOR, justify='right', lmargin1=100, rmargin=10)
+chat_log.tag_configure("bot", foreground=BOT_COLOR, justify='left', lmargin1=10, rmargin=100)
 
-# Initial bot message
 chat_log.config(state=tk.NORMAL)
-chat_log.insert(tk.END, "Bot: Hello! How can I help you today?\n\n", "bot") # Apply 'bot' tag for initial message
+chat_log.insert(tk.END, "Bot: Hello! How can I help you today?\n\n", "bot")
 chat_log.config(state=tk.DISABLED)
 
-# Loading indicator label
-loading_label = tk.Label(root, text="", font=("Arial", 10, "italic"), fg="#6c757d", anchor="w")
-loading_label.grid(row=1, column=0, columnspan=2, padx=10, pady=(0, 5), sticky="ew")
+# Loading label
+loading_label = tk.Label(root, text="", font=("Segoe UI", 10, "italic"), fg="#6c757d", bg=BG_COLOR, anchor="w")
+loading_label.grid(row=1, column=0, columnspan=2, padx=20, sticky="ew")
 
 # Input field
-input_field = tk.Entry(root, width=60, font=("Arial", 12), relief=tk.FLAT, bd=1, highlightbackground="#ced4da", highlightthickness=1)
-input_field.grid(row=2, column=0, padx=(10, 5), pady=(0, 10), sticky="ew")
-
-# Bind placeholder events
+input_field = tk.Entry(root, font=FONT, bg=INPUT_BG, relief=tk.FLAT, fg=PLACEHOLDER_COLOR)
+input_field.grid(row=2, column=0, padx=(20, 10), pady=(0, 20), sticky="ew", ipady=8)
 input_field.bind("<FocusIn>", on_focus_in)
 input_field.bind("<FocusOut>", on_focus_out)
-input_field.bind("<Return>", lambda event=None: send_message()) # Bind Enter key
+input_field.bind("<Return>", lambda event=None: send_message())
 
-# Set initial placeholder
 set_placeholder()
 
-# Send button
-send_button = tk.Button(root, text="Send", command=send_message, font=("Arial", 12, "bold"), 
-                        bg="#082297", fg="white", activebackground="#4F7AC9", activeforeground="white",
-                        relief=tk.GROOVE, bd=2) # Grooved border for a slightly raised effect
-send_button.grid(row=2, column=1, padx=(5, 10), pady=(0, 10), sticky="e")
+# Send Button
+send_button = tk.Button(root, text="Send", command=send_message, font=("Segoe UI", 10, "bold"),
+                        bg=BUTTON_BG, fg="white", relief=tk.FLAT, padx=10, pady=5)
+send_button.grid(row=2, column=1, padx=(10, 20), pady=(0, 20), sticky="e")
 
-# Start the GUI loop
+# Hover effect
+def on_enter(e):
+    send_button.config(bg=BUTTON_HOVER)
+def on_leave(e):
+    send_button.config(bg=BUTTON_BG)
+
+send_button.bind("<Enter>", on_enter)
+send_button.bind("<Leave>", on_leave)
+
 root.mainloop()
