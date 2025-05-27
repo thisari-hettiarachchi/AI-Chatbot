@@ -151,9 +151,13 @@ chat_log.config(state=tk.DISABLED)
 loading_label = tk.Label(root, text="", font=("Segoe UI", 10, "italic"), fg="#6c757d", bg=BG_COLOR, anchor="w")
 loading_label.grid(row=1, column=0, columnspan=2, padx=20, sticky="ew")
 
-# Input field
-input_field = tk.Entry(root, font=FONT, bg=INPUT_BG, relief=tk.FLAT, fg=PLACEHOLDER_COLOR)
-input_field.grid(row=2, column=0, padx=(20, 10), pady=(0, 20), sticky="ew", ipady=8)
+input_frame = tk.Frame(root, bg=INPUT_BG, highlightthickness=2, highlightbackground="#0D47A1", highlightcolor="#0D47A1")
+input_frame.grid(row=2, column=0, padx=(20, 10), pady=(0, 20), sticky="ew", ipady=8)
+
+input_field = tk.Entry(input_frame, font=FONT, bg=INPUT_BG, relief=tk.FLAT, fg=PLACEHOLDER_COLOR, bd=0)
+input_field.pack(fill="both", expand=True, ipady=6)
+
+
 input_field.bind("<FocusIn>", on_focus_in)
 input_field.bind("<FocusOut>", on_focus_out)
 input_field.bind("<Return>", lambda event=None: send_message())
