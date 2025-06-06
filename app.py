@@ -70,11 +70,10 @@ def send_message():
     if not user_input_text or user_input_text == PLACEHOLDER_TEXT:
         return 
 
-    # Display user message on the right
+    # Display user message on the right with background color 
     chat_log.config(state=tk.NORMAL)
-    # The message is inserted within a smaller lmargin/rmargin to simulate a bubble
     chat_log.insert(tk.END, "You: " + user_input_text + "\n", "user")
-    chat_log.insert(tk.END, "\n") # Add a blank line for spacing between bubbles
+    chat_log.insert(tk.END, "\n")
     chat_log.config(state=tk.DISABLED)
     
     # Clear input field and set placeholder after displaying user message
@@ -89,10 +88,10 @@ def send_message():
 
     bot_response = ask_gemini(user_input_text)
 
-    # Display bot message on the left
+    # Display bot message on the left with background color (simulated border)
     chat_log.config(state=tk.NORMAL)
     chat_log.insert(tk.END, "Bot: " + bot_response + "\n", "bot")
-    chat_log.insert(tk.END, "\n") # Add a blank line for spacing between bubbles
+    chat_log.insert(tk.END, "\n")
     chat_log.config(state=tk.DISABLED)
     chat_log.yview(tk.END)
 
@@ -132,11 +131,9 @@ root.resizable(True, True)
 
 # Fonts and Colors
 FONT = ("Segoe UI", 12)
-USER_TEXT_COLOR = "#FFFFFF" # White text for user bubble
-BOT_TEXT_COLOR = "#263238"  # Original bot text color
-USER_BUBBLE_BG = "#1E88E5" # Blue background for user bubble
-BOT_BUBBLE_BG = "#E0E0E0" # Light gray background for bot bubble
-BG_COLOR = "#F4F6F8" # Main window background
+USER_COLOR = "#1E88E5"
+BOT_COLOR = "#263238"
+BG_COLOR = "#F4F6F8"
 INPUT_BG = "#FFFFFF"
 BUTTON_BG = "#0D47A1"
 BUTTON_HOVER = "#1565C0"
@@ -147,43 +144,30 @@ root.grid_columnconfigure(0, weight=1)
 
 # Chat log styling
 chat_log = scrolledtext.ScrolledText(root, wrap=tk.WORD, state=tk.DISABLED,
-                                     font=FONT, bg=BG_COLOR, fg=BOT_TEXT_COLOR, # Chat log background matches window
+                                     font=FONT, bg="#FFFFFF", fg=BOT_COLOR,
                                      relief=tk.FLAT, bd=0)
 chat_log.grid(row=0, column=0, columnspan=2, padx=20, pady=20, sticky="nsew")
 
-# Configure tags for user and bot messages
-chat_log.tag_configure("user",
-                       foreground=USER_TEXT_COLOR, # White text
-                       background=USER_BUBBLE_BG,  # Blue background
-                       justify='right',
-                       lmargin1=250,  # Indent from left for user messages
-                       rmargin=20,    # Right margin for user messages
-                       spacing1=5,    # Space above the tagged line
-                       spacing3=5,    # Space below the tagged line
-                       lmargin2=250   # Used for subsequent lines of a wrapped tag
-                       )
+# Tag configurations with background colors and margins for "border" effect
+chat_log.tag_configure("user", foreground=USER_COLOR, justify='right',
+                       lmargin1=15, lmargin2=15, rmargin=15,
+                       background="#D0E7FF",  # Light blue background for user
+                       spacing1=5, spacing3=3)
 
-chat_log.tag_configure("bot",
-                       foreground=BOT_TEXT_COLOR,
-                       background=BOT_BUBBLE_BG, # Light gray background
-                       justify='left',
-                       lmargin1=20,   # Left margin for bot messages
-                       rmargin=250,   # Indent from right for bot messages
-                       spacing1=5,    # Space above the tagged line
-                       spacing3=5,    # Space below the tagged line
-                       lmargin2=20    # Used for subsequent lines of a wrapped tag
-                       )
+chat_log.tag_configure("bot", foreground=BOT_COLOR, justify='left',
+                       lmargin1=15, lmargin2=15, rmargin=15,
+                       background="#E0E0E0",  # Light gray background for bot
+                       spacing1=5, spacing3=3)
 
 chat_log.config(state=tk.NORMAL)
-chat_log.insert(tk.END, "Bot: Hello! How can I help you today?\n", "bot")
-chat_log.insert(tk.END, "\n") # Extra newline for spacing
+chat_log.insert(tk.END, "Bot: Hello! How can I help you today?\n\n", "bot")
 chat_log.config(state=tk.DISABLED)
 
 # Loading label
 loading_label = tk.Label(root, text="", font=("Segoe UI", 10, "italic"), fg="#6c757d", bg=BG_COLOR, anchor="w")
 loading_label.grid(row=1, column=0, columnspan=2, padx=20, sticky="ew")
 
-input_frame = tk.Frame(root, bg=INPUT_BG, highlightthickness=2, highlightbackground=BUTTON_BG, highlightcolor=BUTTON_BG)
+input_frame = tk.Frame(root, bg=INPUT_BG, highlightthickness=2, highlightbackground="#0D47A1", highlightcolor="#0D47A1")
 input_frame.grid(row=2, column=0, padx=(20, 10), pady=(0, 20), sticky="ew", ipady=8)
 
 input_field = tk.Entry(input_frame, font=FONT, bg=INPUT_BG, relief=tk.FLAT, fg=PLACEHOLDER_COLOR, bd=0)
